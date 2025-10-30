@@ -63,29 +63,28 @@ async function loadItems(catId){
 
 function openCheckout(p){
   modalBody.innerHTML = `
-    <h3>${p.name}</h3>
-    <p class="muted">${p.description||''}</p>
-    <p><b>Price:</b> ₱${Number(p.price).toFixed(2)} • <small>${p.available_stock} on-hand</small></p>
+  <h3>${p.name}</h3>
+  <p class="muted">${p.description||''}</p>
+  <p><b>Price:</b> ₱${Number(p.price).toFixed(2)} • <small>${p.available_stock} on-hand</small></p>
 
-    <div class="paybox card">
-      <img id="qrImg" src="${PAYMENT.gcash.qr}" alt="QR">
-      <div>
-        <label><input type="radio" name="pay" value="gcash" checked> GCash</label>
-        <label style="margin-left:8px"><input type="radio" name="pay" value="maya"> Maya</label>
-        <p class="muted">Scan & pay the exact amount then provide your payment reference below.</p>
-      </div>
+  <div class="paybox card">
+    <img id="qrImg" src="${PAYMENT.gcash.qr}" alt="QR">
+    <div>
+      <label><input type="radio" name="pay" value="gcash" checked> GCash</label>
+      <label style="margin-left:8px"><input type="radio" name="pay" value="maya"> Maya</label>
+      <p class="muted">Scan & pay then provide a reference number <u>or</u> upload a receipt.</p>
     </div>
+  </div>
 
-    <form id="orderForm" class="stack">
-      <label>Name <input id="name" required></label>
-      <label>Email <input id="email" type="email" required></label>
-      <label>Payment reference (optional) <input id="payref" placeholder="e.g., GCash Ref # or Maya Ref #"></label>
-      <label>Upload receipt (optional) <input id="receipt" type="file" accept="image/*"></label>
-      <button class="btn" type="submit">Place Order</button>
-      <div id="msg" class="muted"></div>
-    </form>
-  `;
-  // change QR when method switches
+  <form id="orderForm" class="stack">
+    <label>Name <input id="name" required></label>
+    <label>Email <input id="email" type="email" required></label>
+    <label>Payment reference (required if no receipt) <input id="payref" placeholder="e.g., GCash/Maya Ref #"></label>
+    <label>Upload receipt (required if no reference) <input id="receipt" type="file" accept="image/*"></label>
+    <button class="btn" type="submit">Place Order</button>
+    <div id="msg" class="muted"></div>
+  </form>
+;
   modalBody.querySelectorAll('input[name="pay"]').forEach(r=>{
     r.onchange = ()=>{
       document.getElementById('qrImg').src = PAYMENT[r.value].qr;
