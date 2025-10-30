@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Aiaxcart Premium Shop</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <div class="logo"></div>
+    <div>
+      <h1>Aiaxcart Premium Shop</h1>
+      <small>Classy premium accounts • GCash / Maya</small>
+    </div>
+  </div>
+  <nav>
+    <a href="admin.html" class="btn ghost">Admin</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <aside class="sidebar card">
+    <h3>Categories</h3>
+    <ul id="catList" class="menu"></ul>
+
+    <div class="socials">
+      <p class="muted">Message me:</p>
+      <div class="social-row">
+        <a target="_blank" href="https://t.me/YOURTG" class="chip">Telegram</a>
+        <a target="_blank" href="https://m.me/YOURFB" class="chip">Messenger</a>
+        <a target="_blank" href="https://instagram.com/YOURIG" class="chip">Instagram</a>
+      </div>
+    </div>
+  </aside>
+
+  <section class="content">
+    <div id="itemGrid" class="grid"></div>
+  </section>
+</main>
+
+<!-- Modal -->
+<div id="modal" class="modal hidden" aria-hidden="true">
+  <div class="sheet card">
+    <button id="closeModal" class="icon-close" aria-label="Close">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<footer class="site-footer">© 2025 Aiaxcart Premium Shop</footer>
+
+<script type="module" src="app.js"></script>
+<script type="module" src="shop.js"></script>
+</body>
+</html>
