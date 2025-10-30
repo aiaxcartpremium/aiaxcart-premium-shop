@@ -107,12 +107,36 @@ async function uploadReceipt(file, orderId){
 
 async function submitOrder(e, p){
   e.preventDefault();
-  const name = modalBody.querySelector('#name').value.trim();
-  const email = modalBody.querySelector('#email').value.trim();
-  const ref = modalBody.querySelector('#payref').value.trim();
-  const method = modalBody.querySelector('input[name="pay"]:checked').value;
-  const file = modalBody.querySelector('#receipt').files[0];
 
+  const name   = modalBody.querySelector('#name').value.trim();
+  const email  = modalBody.querySelector('#email').value.trim();
+  const ref    = modalBody.querySelector('#payref').value.trim();
+  const method = modalBody.querySelector('input[name="pay"]:checked').value;
+  const file   = modalBody.querySelector('#receipt').files[0];
+  const msgEl  = modalBody.querySelector('#msg');
+
+  // Require at least one: ref OR receipt
+  if (!ref && !file) {
+    msgEl.textContent = 'Provide a payment reference OR upload a receipt.';
+    return;
+  }
+
+  // If a receipt is provided, upload first so we can include receipt_url in the row
+  let receiptUrl = null;
+  if (file) {
+    try {
+      const path = `web-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from('receipts').upload(path, file);
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from('receipts').getPublicUrl(path);
+      receiptUrl = pub.publicUrl;
+    } catch (err) {
+      msgEl.textContent = `Upload failed: ${err.message}`;
+      return;
+    }
+  }
+
+  // Insert order (RLS must allow anon insert)
   const { data: order, error } = await supabase.from('orders').insert({
     product_id: p.id,
     product_name: p.name,
@@ -121,17 +145,18 @@ async function submitOrder(e, p){
     customer_email: email,
     payment_method: method,
     payment_ref: ref || null,
+    receipt_url: receiptUrl,
     status: 'pending'
   }).select().single();
 
-  if (error){ modalBody.querySelector('#msg').textContent = error.message; return; }
+  if (error) {
+    // most common if RLS policy missing:
+    msgEl.textContent = `Could not place order: ${error.message}. (Tip: ensure 'public_insert_orders' policy exists)`;
+    return;
+  }
 
-  try{
-    const url = await uploadReceipt(file, order.id);
-    if (url) await supabase.from('orders').update({receipt_url:url}).eq('id', order.id);
-  }catch(_){}
-
-  modalBody.querySelector('#msg').innerHTML =
+  msgEl.innerHTML =
     `✅ Order placed! <br><small>ID: <code>${order.id}</code></small><br>
-     We’ll verify payment and drop your account via email.`;
+     We’ll verify payment and deliver credentials to your email.`;
 }
+
