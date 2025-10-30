@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin • Aiaxcart Premium Shop</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand"><div class="logo"></div><h1>Admin</h1></div>
+  <nav><a href="index.html" class="btn ghost">Storefront</a></nav>
+</header>
+
+<main class="wrap">
+  <section id="authBox" class="card">
+    <h3>Login</h3>
+    <label>Email <input id="email" type="email"></label>
+    <label>Password <input id="password" type="password"></label>
+    <button id="loginBtn" class="btn">Login</button>
+    <div id="authMsg" class="muted"></div>
+  </section>
+
+  <section id="adminArea" class="hidden">
+    <div id="stats" class="card"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Products</h3>
+        <form id="prodForm" class="stack">
+          <select id="pCat"></select>
+          <input id="pName" placeholder="Name" required>
+          <input id="pPrice" type="number" step="0.01" placeholder="Price" required>
+          <textarea id="pDesc" placeholder="Description"></textarea>
+          <label><input id="pAvail" type="checkbox" checked> Available</label>
+          <input id="pStock" type="number" step="1" placeholder="Available stock (on-hand count)">
+          <button class="btn" type="submit">Add / Update</button>
+        </form>
+        <div id="prodList"></div>
+      </div>
+
+      <div class="card">
+        <h3>On-hand Accounts</h3>
+        <form id="invForm" class="stack">
+          <select id="invProd"></select>
+          <input id="invUser" placeholder="Username / Email / Code" required>
+          <input id="invSecret" placeholder="Password / Token" required>
+          <input id="invNotes" placeholder="Notes (optional)">
+          <button class="btn" type="submit">Add Account</button>
+        </form>
+        <div id="invList"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Orders</h3>
+        <button id="csvBtn" class="btn ghost">📤 Export CSV</button>
+      </div>
+      <div id="orderList"></div>
+    </div>
+
+    <button id="logoutBtn" class="btn ghost" style="margin-top:12px">Logout</button>
+  </section>
+</main>
+
+<script type="module" src="app.js"></script>
+<script type="module" src="admin.js"></script>
+</body>
+</html>
