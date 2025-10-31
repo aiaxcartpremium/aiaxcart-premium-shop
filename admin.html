@@ -169,41 +169,46 @@
     <section id="adminArea" class="hidden">
       <div id="stats" class="card"></div>
 
-      <div class="grid-2">
-        <div class="card">
-          <h3>Products</h3>
-          <form id="prodForm">
-            <label>Category</label>
-            <select id="pCat"></select>
-            <label>Name</label>
-            <input id="pName" required>
-            <label>Price</label>
-            <input id="pPrice" type="number" step="0.01" required>
-            <label>Description</label>
-            <textarea id="pDesc" rows="2"></textarea>
-            <label><input id="pAvail" type="checkbox" checked> Available</label>
-            <input id="pStock" type="number" step="1" placeholder="Available stock (on-hand count)">
-            <button class="btn" type="submit">Add / Update</button>
-          </form>
-          <div id="prodList"></div>
-        </div>
+<section class="card">
+  <h3>Products</h3>
 
-        <div class="card">
-          <h3>On-hand Accounts</h3>
-          <form id="invForm">
-            <label>Product</label>
-            <select id="invProd"></select>
-            <label>Username / Email / Code</label>
-            <input id="invUser" required>
-            <label>Password / Token</label>
-            <input id="invSecret" required>
-            <label>Notes (optional)</label>
-            <input id="invNotes">
-            <button class="btn" type="submit">Add Account</button>
-          </form>
-          <div id="invList"></div>
-        </div>
-      </div>
+  <label>Category</label>
+  <div id="pCatChips" class="chipbar" style="margin-bottom:8px"></div>
+  <input id="pCat" type="hidden" required />
+
+  <input id="pName" placeholder="Name" />
+  <input id="pPrice" type="number" step="0.01" placeholder="Price" />
+  <textarea id="pDesc" placeholder="Description"></textarea>
+
+  <label class="check"><input id="pAvail" type="checkbox" checked> Available</label>
+  <input id="pStock" type="number" step="1" placeholder="Available stock (on-hand count)" />
+
+  <div class="actions">
+    <button id="prodSave" class="btn primary">Add / Update</button>
+  </div>
+  <div id="prodList" class="list" style="margin-top:10px"></div>
+</section>
+
+
+        <!-- ON-HAND -->
+<section class="card">
+  <h3>On-hand Accounts</h3>
+
+  <label>Pick category then tap a product</label>
+  <div id="iCatChips" class="chipbar"></div>
+  <div id="iProdChips" class="chipbar" style="margin-bottom:8px"></div>
+  <input id="invProd" type="hidden" required />
+
+  <input id="invUser"   placeholder="Username / Email / Code" />
+  <input id="invSecret" placeholder="Password / Token" />
+  <input id="invNotes"  placeholder="Notes (optional)" />
+
+  <div class="actions">
+    <button id="invAdd" class="btn">Add Account</button>
+  </div>
+  <div id="invList" class="list" style="margin-top:10px"></div>
+</section>
+
 
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
