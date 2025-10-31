@@ -1,3 +1,14 @@
+import { supabase } from './app.js';
+
+const c = await supabase.from('categories').select('id,name').order('sort');
+console.log('categories:', c);
+
+const p = await supabase.from('products')
+  .select('id,name,available')
+  .eq('available', true)
+  .order('created_at', { ascending: false });
+console.log('products:', p);
+
 import { supabase, PAYMENT, SOCIALS } from './app.js';
 
 const catList = document.getElementById('catList');
