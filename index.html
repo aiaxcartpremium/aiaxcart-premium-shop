@@ -9,51 +9,76 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header class="site-header">
-  <div class="brand">
-    <div class="logo"></div>
-    <div>
+  <header class="container">
+    <div class="brand">
+      <div class="dot"></div>
       <h1>Aiaxcart Premium Shop</h1>
-      <small>Classy premium accounts • GCash / Maya</small>
     </div>
-  </div>
-  <nav>
-    <a href="admin.html" class="btn ghost">Admin</a>
-  </nav>
-</header>
+    <a href="./admin.html" class="btn ghost">Admin</a>
+  </header>
 
-<main class="wrap">
-  <aside class="sidebar card">
-    <h3>Categories</h3>
-    <ul id="catList" class="menu"></ul>
-
-    <div class="socials">
-      <p class="muted">Message me:</p>
-      <div class="social-row">
-        <a target="_blank" href="https://t.me/YOURTG" class="chip">Telegram</a>
-        <a target="_blank" href="https://m.me/YOURFB" class="chip">Messenger</a>
-        <a target="_blank" href="https://instagram.com/YOURIG" class="chip">Instagram</a>
+  <main class="container">
+    <!-- Socials -->
+    <section class="card" style="max-width:420px">
+      <h3>Categories</h3>
+      <p class="muted" style="margin-top:-4px">Message me:</p>
+      <div class="chipbar">
+        <a class="chip" target="_blank" href="https://t.me/">Telegram</a>
+        <a class="chip" target="_blank" href="https://m.me/">Messenger</a>
+        <a class="chip" target="_blank" href="https://instagram.com/">Instagram</a>
       </div>
-    </div>
-  </aside>
+    </section>
 
-  <section class="content">
-    <div id="itemGrid" class="grid"></div>
-  </section>
-</main>
+    <!-- Category filter -->
+    <section>
+      <div id="catChips" class="chipbar" style="margin:10px 0 18px"></div>
+    </section>
 
-<!-- Modal -->
-<div id="modal" class="modal hidden" aria-hidden="true">
-  <div class="sheet card">
-    <button id="closeModal" class="icon-close" aria-label="Close">×</button>
-    <div id="modalBody"></div>
-  </div>
-</div>
+    <!-- PRODUCT GRID -->
+    <section id="grid" class="grid"></section>
+  </main>
 
-<footer class="site-footer">© 2025 Aiaxcart Premium Shop</footer>
+  <!-- CHECKOUT MODAL -->
+  <dialog id="checkout">
+    <form method="dialog" class="modal">
+      <button class="close" value="close" aria-label="Close">×</button>
+      <h3 id="ckTitle">Checkout</h3>
+      <p class="muted" id="ckSubtitle"></p>
 
-<script type="module" src="./app.js?v=7"></script>
-<script type="module" src="./shop.js?v=7"></script>
-</body>
+      <div class="seg">
+        <label class="radio"><input type="radio" name="pay" value="gcash" checked> GCash</label>
+        <label class="radio"><input type="radio" name="pay" value="maya"> Maya</label>
+      </div>
+
+      <div class="seg">
+        <label>Name</label>
+        <input id="ckName" placeholder="Your name" required />
+      </div>
+      <div class="seg">
+        <label>Email</label>
+        <input id="ckEmail" type="email" placeholder="you@email.com" required />
+      </div>
+      <div class="seg">
+        <label>Payment reference (required if no receipt)</label>
+        <input id="ckRef" placeholder="e.g., 2R35332" />
+      </div>
+      <div class="seg">
+        <label>Upload receipt (optional)</label>
+        <input id="ckFile" type="file" accept="image/*,application/pdf" />
+        <small class="muted">Either reference OR receipt is required.</small>
+      </div>
+
+      <menu>
+        <button class="btn ghost" value="close">Cancel</button>
+        <button id="placeBtn" class="btn primary">Place Order</button>
+      </menu>
+      <p id="ckMsg" class="muted" style="margin-top:6px"></p>
+    </form>
+  </dialog>
+
+  <footer class="container foot">© 2025 Aiaxcart Premium Shop</footer>
+
+  <script type="module" src="./app.js?v=13"></script>
+  <script type="module" src="./shop.js?v=13"></script>
+</body
 </html>
