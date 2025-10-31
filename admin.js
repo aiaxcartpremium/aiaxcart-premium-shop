@@ -70,9 +70,97 @@ await requireAdminSession().then(ok => { if(ok) initAdmin(); });
 // ---------- Admin App ----------
 async function initAdmin(){
   await Promise.all([loadCategories(), loadProducts(), loadOnhand(), loadOrders(), loadStats()]);
-  document.getElementById('prodForm').onsubmit = guarded(saveProduct);
-  document.getElementById('invForm').onsubmit  = guarded(addOnhand);
-  document.getElementById('csvBtn').onclick   = guarded(exportCSV);
+  // ==== hook buttons (after you call initAdmin) ====
+document.getElementById('prodSave').onclick = guarded(saveProduct);
+document.getElementById('invAdd').onclick  = guarded(addOnhand);
+
+// ---- load categories & render chips for product and inventory ----
+async function loadCategories(){
+  const { data: cats } = await supabase.from('categories').select('id,name,sort').order('sort');
+  const pWrap = document.getElementById('pCatChips');
+  const iWrap = document.getElementById('iCatChips');
+  pWrap.innerHTML = ''; iWrap.innerHTML = '';
+
+  cats?.forEach(c=>{
+    const b1 = document.createElement('button');
+    b1.className='chip'; b1.textContent=c.name;
+    b1.onclick = ()=>{ document.getElementById('pCat').value=c.id; highlightChip(pWrap,b1); };
+    pWrap.appendChild(b1);
+
+    const b2 = document.createElement('button');
+    b2.className='chip'; b2.textContent=c.name;
+    b2.onclick = ()=> loadInventoryProducts(c.id);
+    iWrap.appendChild(b2);
+  });
+
+  // preselect first for add product
+  if (cats?.length){ document.getElementById('pCat').value=cats[0].id; highlightChip(pWrap,pWrap.firstChild); }
+
+  // load full product list (right panel + inv chips)
+  await loadProducts();
+  await loadInventoryProducts(cats?.[0]?.id);
+}
+
+function highlightChip(container, btn){
+  [...container.querySelectorAll('.chip')].forEach(x=>x.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+async function loadInventoryProducts(catId){
+  const chipbar = document.getElementById('iProdChips');
+  chipbar.innerHTML='';
+  let q = supabase.from('products').select('id,name,category_id').order('name');
+  if (catId) q = q.eq('category_id', catId);
+  const { data: prods } = await q;
+  prods?.forEach(p=>{
+    const b = document.createElement('button');
+    b.className='chip'; b.textContent=p.name;
+    b.onclick = ()=>{ document.getElementById('invProd').value=p.id; highlightChip(chipbar,b); };
+    chipbar.appendChild(b);
+  });
+  if (prods?.length){ document.getElementById('invProd').value=prods[0].id; highlightChip(chipbar, chipbar.firstChild); }
+}
+
+/* --- save product uses hidden #pCat --- */
+async function saveProduct(){
+  const body = {
+    category_id: Number(document.getElementById('pCat').value),
+    name:        document.getElementById('pName').value,
+    price:       Number(document.getElementById('pPrice').value || 0),
+    description: document.getElementById('pDesc').value || null,
+    available:   document.getElementById('pAvail').checked,
+    available_stock: Number(document.getElementById('pStock').value || 0),
+  };
+  if (!body.category_id) return alert('Pick a category');
+  if (!body.name)        return alert('Name required');
+
+  const id = document.getElementById('prodForm')?.dataset.editId;
+  if (id) await supabase.from('products').update(body).eq('id', id);
+  else    await supabase.from('products').insert(body);
+
+  await loadProducts();
+  document.getElementById('pName').value='';
+  document.getElementById('pPrice').value='';
+  document.getElementById('pDesc').value='';
+  document.getElementById('pStock').value='';
+}
+
+/* --- add on-hand uses hidden #invProd --- */
+async function addOnhand(){
+  const prodId   = document.getElementById('invProd').value;
+  const username = document.getElementById('invUser').value;
+  const secret   = document.getElementById('invSecret').value;
+  const notes    = document.getElementById('invNotes').value;
+
+  if (!prodId) return alert('Pick a product');
+  if (!username || !secret) return alert('Fill username & secret');
+
+  await supabase.from('onhand_accounts').insert({ product_id: prodId, username, secret, notes });
+  await supabase.rpc('increment_stock', { p_product_id: prodId });
+  document.getElementById('invUser').value='';
+  document.getElementById('invSecret').value='';
+  document.getElementById('invNotes').value='';
+  await loadOnhand();
 }
 
 // Guard to prevent actions when not admin
