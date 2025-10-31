@@ -14,20 +14,27 @@ function showAdmin(show){
 }
 
 async function requireAdminSession(){
-  // 1) Check session
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session }, error: sErr } = await supabase.auth.getSession();
+  console.log('SESSION:', session, sErr);
+
   if(!session){ currentUser=null; isAdmin=false; showAdmin(false); return false; }
 
   currentUser = session.user;
+  console.log('User id:', currentUser.id, 'email:', currentUser.email);
 
-  // 2) Verify admin role server-side
   const { data: roles, error } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', currentUser.id)
     .single();
 
-  if(error || !roles || roles.role!=='admin'){
+  console.log('ROLE QUERY:', { roles, error });
+
+  if(error) {
+    authMsg.textContent = `Role read error: ${error.message}`;
+  }
+
+  if(!roles || roles.role !== 'admin'){
     await supabase.auth.signOut();
     authMsg.textContent = 'Your account is not authorized as admin.';
     currentUser=null; isAdmin=false; showAdmin(false);
@@ -37,6 +44,7 @@ async function requireAdminSession(){
   isAdmin = true; showAdmin(true);
   return true;
 }
+
 
 // ---------- Login / Logout ----------
 document.getElementById('loginBtn').onclick = async ()=>{
