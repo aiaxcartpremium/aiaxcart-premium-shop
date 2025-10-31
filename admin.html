@@ -1,71 +1,224 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Admin • Aiaxcart Premium Shop</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aiaxcart Premium Shop — Admin</title>
+  <link rel="stylesheet" href="./style.css?v=5" />
+
+  <style>
+    /* ——— Color Palette ——— */
+    :root {
+      --rose: #A7816D;
+      --rose-light: #AF8F7E;
+      --pink-light: #DFC1CB;
+      --mauve: #C48197;
+      --rose-deep: #B66681;
+      --bg: #faf8f8;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+
+    .site-header {
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--rose-light), var(--mauve));
+    }
+
+    .brand h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+    }
+
+    .btn {
+      background: var(--rose);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-weight: 500;
+    }
+
+    .btn:hover { background: var(--rose-deep); }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--rose);
+      color: var(--rose);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: #fff;
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    h3 { margin-top: 0; color: var(--rose-deep); }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .hidden { display: none !important; }
+
+    .item {
+      border-top: 1px solid #eee;
+      padding-top: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .muted { color: #666; font-size: 0.9rem; }
+    .actions { margin-top: 0.4rem; display: flex; gap: 0.5rem; }
+    .btn.small { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+
+    #authBox {
+      max-width: 400px;
+      margin: 3rem auto;
+    }
+
+    #authMsg {
+      color: var(--rose-deep);
+      font-weight: 500;
+      margin-top: 6px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
+
 <body>
-
-<header class="site-header">
-  <div class="brand"><div class="logo"></div><h1>Admin</h1></div>
-  <nav><a href="index.html" class="btn ghost">Storefront</a></nav>
-</header>
-
-<main class="wrap">
-  <section id="authBox" class="card">
-    <h3>Login</h3>
-    <label>Email <input id="email" type="email"></label>
-    <label>Password <input id="password" type="password"></label>
-    <button id="loginBtn" class="btn">Login</button>
-    <div id="authMsg" class="muted"></div>
-  </section>
-
-  <section id="adminArea" class="hidden">
-    <div id="stats" class="card"></div>
-
-    <div class="grid-2">
-      <div class="card">
-        <h3>Products</h3>
-        <form id="prodForm" class="stack">
-          <select id="pCat"></select>
-          <input id="pName" placeholder="Name" required>
-          <input id="pPrice" type="number" step="0.01" placeholder="Price" required>
-          <textarea id="pDesc" placeholder="Description"></textarea>
-          <label><input id="pAvail" type="checkbox" checked> Available</label>
-          <input id="pStock" type="number" step="1" placeholder="Available stock (on-hand count)">
-          <button class="btn" type="submit">Add / Update</button>
-        </form>
-        <div id="prodList"></div>
-      </div>
-
-      <div class="card">
-        <h3>On-hand Accounts</h3>
-        <form id="invForm" class="stack">
-          <select id="invProd"></select>
-          <input id="invUser" placeholder="Username / Email / Code" required>
-          <input id="invSecret" placeholder="Password / Token" required>
-          <input id="invNotes" placeholder="Notes (optional)">
-          <button class="btn" type="submit">Add Account</button>
-        </form>
-        <div id="invList"></div>
-      </div>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo"></div>
+      <h1>Admin</h1>
     </div>
+    <nav>
+      <a href="index.html" class="btn ghost">Storefront</a>
+    </nav>
+  </header>
 
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <h3>Orders</h3>
-        <button id="csvBtn" class="btn ghost">📤 Export CSV</button>
+  <main>
+    <!-- LOGIN -->
+    <section id="authBox" class="card">
+      <h3>Login</h3>
+      <label>Email</label>
+      <input id="email" type="email" placeholder="admin@example.com" autocomplete="username" required>
+      <label>Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+      <button id="loginBtn" class="btn">Login</button>
+      <div id="authMsg"></div>
+    </section>
+
+    <!-- ADMIN DASHBOARD (hidden until verified admin) -->
+    <section id="adminArea" class="hidden">
+      <div id="stats" class="card"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Products</h3>
+          <form id="prodForm">
+            <label>Category</label>
+            <select id="pCat"></select>
+            <label>Name</label>
+            <input id="pName" required>
+            <label>Price</label>
+            <input id="pPrice" type="number" step="0.01" required>
+            <label>Description</label>
+            <textarea id="pDesc" rows="2"></textarea>
+            <label><input id="pAvail" type="checkbox" checked> Available</label>
+            <input id="pStock" type="number" step="1" placeholder="Available stock (on-hand count)">
+            <button class="btn" type="submit">Add / Update</button>
+          </form>
+          <div id="prodList"></div>
+        </div>
+
+        <div class="card">
+          <h3>On-hand Accounts</h3>
+          <form id="invForm">
+            <label>Product</label>
+            <select id="invProd"></select>
+            <label>Username / Email / Code</label>
+            <input id="invUser" required>
+            <label>Password / Token</label>
+            <input id="invSecret" required>
+            <label>Notes (optional)</label>
+            <input id="invNotes">
+            <button class="btn" type="submit">Add Account</button>
+          </form>
+          <div id="invList"></div>
+        </div>
       </div>
-      <div id="orderList"></div>
-    </div>
 
-    <button id="logoutBtn" class="btn ghost" style="margin-top:12px">Logout</button>
-  </section>
-</main>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>Orders</h3>
+          <button id="csvBtn" class="btn ghost">📤 Export CSV</button>
+        </div>
+        <div id="orderList"></div>
+      </div>
 
-<script type="module" src="app.js"></script>
-<script type="module" src="admin.js"></script>
+      <button id="logoutBtn" class="btn ghost">Logout</button>
+    </section>
+  </main>
+
+  <!-- JS -->
+  <script type="module" src="./app.js?v=5"></script>
+  <script type="module" src="./admin.js?v=5"></script>
 </body>
 </html>
