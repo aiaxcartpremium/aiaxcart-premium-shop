@@ -1,173 +1,93 @@
+// shop.js
 import { supabase } from './app.js';
 
-const c = await supabase.from('categories').select('id,name').order('sort');
-console.log('categories:', c);
+/* ---------- helpers: mount target container (auto-create) ---------- */
+function getMount() {
+  // try common containers; else create one
+  let el =
+    document.getElementById('catalog') ||
+    document.getElementById('productList') ||
+    document.getElementById('items') ||
+    document.querySelector('main');
 
-const p = await supabase.from('products')
-  .select('id,name,available')
-  .eq('available', true)
-  .order('created_at', { ascending: false });
-console.log('products:', p);
-
-import { supabase, PAYMENT, SOCIALS } from './app.js';
-
-const catList = document.getElementById('catList');
-const itemGrid = document.getElementById('itemGrid');
-const modal = document.getElementById('modal');
-const closeModal = document.getElementById('closeModal');
-const modalBody = document.getElementById('modalBody');
-
-closeModal.onclick = ()=> modal.classList.add('hidden');
-modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.classList.add('hidden'); });
-
-(async function init(){
-  // load categories
-  const { data: cats } = await supabase.from('categories').select('*').order('sort');
-  renderCats(cats);
-
-  // auto select first
-  if (cats?.length) loadItems(cats[0].id);
-
-  // socials
-  document.querySelector('.social-row').innerHTML = `
-    <a class="chip" target="_blank" href="${SOCIALS.tg}">Telegram</a>
-    <a class="chip" target="_blank" href="${SOCIALS.fb}">Messenger</a>
-    <a class="chip" target="_blank" href="${SOCIALS.ig}">Instagram</a>`;
-})();
-
-function renderCats(cats){
-  catList.innerHTML = '';
-  cats.forEach((c, i)=>{
-    const li = document.createElement('li');
-    li.innerHTML = `<button ${i===0?'class="active"':''}>${c.name}</button>`;
-    li.querySelector('button').onclick = ()=>{
-      catList.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-      li.querySelector('button').classList.add('active');
-      loadItems(c.id);
-    };
-    catList.appendChild(li);
-  });
+  if (!el) {
+    el = document.createElement('main');
+    document.body.appendChild(el);
+  }
+  // make an inner grid holder
+  let grid = el.querySelector('#items');
+  if (!grid) {
+    grid = document.createElement('div');
+    grid.id = 'items';
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(240px,1fr))';
+    grid.style.gap = '16px';
+    grid.style.margin = '24px auto';
+    grid.style.maxWidth = '1200px';
+    el.appendChild(grid);
+  }
+  return grid;
 }
 
-async function loadItems(catId){
-  const { data: items, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('category_id', catId)
-    .eq('available', true)
-    .order('name');
-  if (error) { itemGrid.innerHTML = `<div class="card">Error: ${error.message}</div>`; return; }
-  itemGrid.innerHTML = '';
-  items.forEach(p=>{
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <h4>${p.name}</h4>
-      <div class="muted">${p.description||''}</div>
-      <p><b>₱${Number(p.price).toFixed(2)}</b> • <small>${p.available_stock} on-hand</small></p>
-      <button class="btn">Order</button>
-    `;
-    div.querySelector('button').onclick = ()=> openCheckout(p);
-    itemGrid.appendChild(div);
-  });
+function pricePhp(n) {
+  return '₱' + Number(n ?? 0).toFixed(2);
 }
 
-function openCheckout(p){
-  modalBody.innerHTML = `
-  <h3>${p.name}</h3>
-  <p class="muted">${p.description||''}</p>
-  <p><b>Price:</b> ₱${Number(p.price).toFixed(2)} • <small>${p.available_stock} on-hand</small></p>
-
-  <div class="paybox card">
-    <img id="qrImg" src="${PAYMENT.gcash.qr}" alt="QR">
-    <div>
-      <label><input type="radio" name="pay" value="gcash" checked> GCash</label>
-      <label style="margin-left:8px"><input type="radio" name="pay" value="maya"> Maya</label>
-      <p class="muted">Scan & pay then provide a reference number <u>or</u> upload a receipt.</p>
+function cardHTML(p) {
+  const stock = Number(p.available_stock ?? 0);
+  return `
+  <div class="card" style="
+      background:#fff; border:1px solid #eee; border-radius:16px;
+      padding:18px; box-shadow:0 6px 20px rgba(0,0,0,.04)">
+    <h3 style="margin:0 0 6px 0; font-size:18px">${p.name}</h3>
+    <div style="color:#956475; font-weight:600; margin-bottom:6px">${pricePhp(p.price)}</div>
+    <div style="color:#6b6b6b; min-height:32px">${p.description ?? ''}</div>
+    <div style="margin:10px 0 14px; color:#777;">
+      <small>${stock} on-hand</small>
     </div>
-  </div>
-
-  <form id="orderForm" class="stack">
-    <label>Name <input id="name" required></label>
-    <label>Email <input id="email" type="email" required></label>
-    <label>Payment reference (required if no receipt) <input id="payref" placeholder="e.g., GCash/Maya Ref #"></label>
-    <label>Upload receipt (required if no reference) <input id="receipt" type="file" accept="image/*"></label>
-    <button class="btn" type="submit">Place Order</button>
-    <div id="msg" class="muted"></div>
-  </form>
-;
-  modalBody.querySelectorAll('input[name="pay"]').forEach(r=>{
-    r.onchange = ()=>{
-      document.getElementById('qrImg').src = PAYMENT[r.value].qr;
-    };
-  });
-
-  modal.classList.remove('hidden');
-
-  modalBody.querySelector('#orderForm').onsubmit = (e)=> submitOrder(e, p);
+    <button data-id="${p.id}" class="orderBtn" style="
+        width:100%; border:none; border-radius:12px; padding:10px 14px;
+        background:#c48197; color:#fff; font-weight:600; cursor:pointer">
+      Order
+    </button>
+  </div>`;
 }
 
-async function uploadReceipt(file, orderId){
-  if (!file) return null;
-  const path = `${orderId}/${Date.now()}_${file.name}`;
-  const { error } = await supabase.storage.from('receipts').upload(path, file);
-  if (error) throw error;
-  const { data: pub } = supabase.storage.from('receipts').getPublicUrl(path);
-  return pub.publicUrl;
-}
+/* ---------- main ---------- */
+(async function init() {
+  const grid = getMount();
 
-async function submitOrder(e, p){
-  e.preventDefault();
-
-  const name   = modalBody.querySelector('#name').value.trim();
-  const email  = modalBody.querySelector('#email').value.trim();
-  const ref    = modalBody.querySelector('#payref').value.trim();
-  const method = modalBody.querySelector('input[name="pay"]:checked').value;
-  const file   = modalBody.querySelector('#receipt').files[0];
-  const msgEl  = modalBody.querySelector('#msg');
-
-  // Require at least one: ref OR receipt
-  if (!ref && !file) {
-    msgEl.textContent = 'Provide a payment reference OR upload a receipt.';
-    return;
-  }
-
-  // If a receipt is provided, upload first so we can include receipt_url in the row
-  let receiptUrl = null;
-  if (file) {
-    try {
-      const path = `web-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from('receipts').upload(path, file);
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from('receipts').getPublicUrl(path);
-      receiptUrl = pub.publicUrl;
-    } catch (err) {
-      msgEl.textContent = `Upload failed: ${err.message}`;
-      return;
-    }
-  }
-
-  // Insert order (RLS must allow anon insert)
-  const { data: order, error } = await supabase.from('orders').insert({
-    product_id: p.id,
-    product_name: p.name,
-    price: p.price,
-    customer_name: name,
-    customer_email: email,
-    payment_method: method,
-    payment_ref: ref || null,
-    receipt_url: receiptUrl,
-    status: 'pending'
-  }).select().single();
+  // fetch available products
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('id,name,price,description,available_stock,available')
+    .eq('available', true)
+    .order('created_at', { ascending: false });
 
   if (error) {
-    // most common if RLS policy missing:
-    msgEl.textContent = `Could not place order: ${error.message}. (Tip: ensure 'public_insert_orders' policy exists)`;
+    grid.innerHTML = `<div style="color:#b00020">Error: ${error.message}</div>`;
     return;
   }
 
-  msgEl.innerHTML =
-    `✅ Order placed! <br><small>ID: <code>${order.id}</code></small><br>
-     We’ll verify payment and deliver credentials to your email.`;
-}
+  if (!products || products.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:#666;padding:28px;">
+        <h3 style="margin:0 0 8px">No items yet</h3>
+        <p style="margin:0">Add products in your Admin → Products and set <b>Available</b> = true.</p>
+      </div>`;
+    return;
+  }
 
+  grid.innerHTML = products.map(cardHTML).join('');
+
+  // wire Order buttons (keep simple: scroll to social links or show toast)
+  grid.querySelectorAll('.orderBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // If you already have a checkout modal, call it here.
+      // For now, smooth scroll to your "Message me" section if present:
+      const social = Array.from(document.querySelectorAll('a,button'))
+        .find(x => /Telegram|Messenger|Instagram/i.test(x.textContent || ''));
+      if (social) social.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+})();
